@@ -1101,11 +1101,33 @@ rm -rf /var/www/ssl/*.cer
 rm -rf /var/www/ssl/*.key
 find /var/www/ssl/*.pem | grep -v "dhparam.pem" | xargs -I {} rm -rf {}
 
+# 自动获取去掉最左一级后的主域名及通配符
+get_ssl_domains() {
+  local domain="$1"
+  domain="${domain%.}"  # 去掉最后的点
+  IFS='.' read -ra parts <<< "$domain"
+  local n=${#parts[@]}
+  if [ "$n" -le 2 ]; then
+    # 只有主域名和顶级域名
+    echo "$domain *.$domain"
+  else
+    # 去掉最左一级
+    local base_domain="${parts[@]:1:$n-1}"
+    base_domain=$(echo $base_domain | tr ' ' '.')
+    echo "$base_domain *.$base_domain"
+  fi
+}
+
+ssl_domains="$(get_ssl_domains "$domain")"
+main_domain=$(echo "$ssl_domains" | awk '{print $1}')
+wildcard_domain=$(echo "$ssl_domains" | awk '{print $2}')
+
 curl https://get.acme.sh | sh
 "/root/.acme.sh"/acme.sh --upgrade  --auto-upgrade
 "/root/.acme.sh"/acme.sh --set-default-ca  --server letsencrypt
-"/root/.acme.sh"/acme.sh --issue --dns dns_cf -d $topDomain -d *.$topDomain -k ec-256 --dnssleep 180
-"/root/.acme.sh"/acme.sh --installcert -d $topDomain \
+
+"/root/.acme.sh"/acme.sh --issue --dns dns_cf -d "$main_domain" -d "$wildcard_domain" -k ec-256 --dnssleep 180
+"/root/.acme.sh"/acme.sh --installcert -d "$main_domain" \
                --key-file       /var/www/ssl/de_GWD.key  \
                --fullchain-file /var/www/ssl/de_GWD.cer \
                --reloadcmd     "systemctl force-reload nginx" \
@@ -1113,8 +1135,6 @@ curl https://get.acme.sh | sh
 
 chmod 644 /var/www/ssl/*.key
 }
-
-
 
 makeSSL_W(){
 crontab -l 2>/dev/null >/tmp/now.cron
