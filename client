@@ -17,7 +17,7 @@ branch="main"
 
 
 installCMD=`cat << EOF
-bash <(wget --no-check-certificate -qO- https://ghproxy.net/https://raw.githubusercontent.com/stuinx/de_GWD/main/client)
+bash <(wget --no-check-certificate -qO- https://ghproxy.stuinx.eu.org/https://raw.githubusercontent.com/stuinx/de_GWD/main/client)
 EOF
 `
 
@@ -111,10 +111,10 @@ preDL(){
 mkdir -p /opt/de_GWD
 mkdir -p /opt/de_GWD/.repo
 
-sha256sum_IPchnroute=$(curl -fsSLo- https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute.sha256sum)
+sha256sum_IPchnroute=$(curl -fsSLo- https://ghproxy.stuinx.eu.org/https://raw.githubusercontent.com/stuinx/chnroute/main/IPchnroute.sha256sum)
 if [[ -n $sha256sum_IPchnroute ]] && [[ $(checkSum /opt/de_GWD/.repo/IPchnroute $sha256sum_IPchnroute) = "false" ]] ; then
 rm -rf /tmp/IPchnroute
-wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://ghproxy.net/https://raw.githubusercontent.com/jacyl4/chnroute/main/IPchnroute
+wget --no-check-certificate --show-progress -cqO /tmp/IPchnroute https://ghproxy.stuinx.eu.org/https://raw.githubusercontent.com/stuinx/chnroute/main/IPchnroute
 [[ $(checkSum /tmp/IPchnroute $sha256sum_IPchnroute) = "false" ]] && echo -e "${WHITE}IPchnroute${RED} Download Failed${cRES}" && exit
 [[ $(checkSum /tmp/IPchnroute $sha256sum_IPchnroute) = "true" ]] && mv -f /tmp/IPchnroute /opt/de_GWD/.repo/IPchnroute
 fi
@@ -122,10 +122,10 @@ fi
 if [[ -f "./de_GWD_$architecture.zip" ]]; then
     mv -f ./de_GWD_$architecture.zip /opt/de_GWD/.repo/de_GWD.zip
 else
-    sha256sum_de_GWD=$(curl -fsSLo- https://ghproxy.net/https://raw.githubusercontent.com/stuinx/de_GWD/main/de_GWD_"$architecture".zip.sha256sum)
+    sha256sum_de_GWD=$(curl -fsSLo- https://ghproxy.stuinx.eu.org/https://raw.githubusercontent.com/stuinx/de_GWD/main/de_GWD_"$architecture".zip.sha256sum)
     if [[ -n $sha256sum_de_GWD ]] && [[ $(checkSum /opt/de_GWD/.repo/de_GWD.zip $sha256sum_de_GWD) = "false" ]]; then
     rm -rf /tmp/de_GWD.zip
-    wget --no-check-certificate --show-progress -cqO /tmp/de_GWD.zip https://ghproxy.net/https://raw.githubusercontent.com/stuinx/de_GWD/main/de_GWD_"$architecture".zip
+    wget --no-check-certificate --show-progress -cqO /tmp/de_GWD.zip https://ghproxy.stuinx.eu.org/https://raw.githubusercontent.com/stuinx/de_GWD/main/de_GWD_"$architecture".zip
     [[ $(checkSum /tmp/de_GWD.zip $sha256sum_de_GWD) = "false" ]] && rm -rf /tmp/de_GWD.zip && wget --no-check-certificate --show-progress -cqO /tmp/de_GWD.zip https://de-gwd.accxio.workers.dev/de_GWD_"$architecture".zip
     [[ $(checkSum /tmp/de_GWD.zip $sha256sum_de_GWD) = "false" ]] && echo -e "${WHITE}de_GWD Zip${RED} Download Failed${cRES}" && exit
     [[ $(checkSum /tmp/de_GWD.zip $sha256sum_de_GWD) = "true" ]] && mv -f /tmp/de_GWD.zip /opt/de_GWD/.repo/de_GWD.zip
